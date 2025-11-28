@@ -1,0 +1,1027 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DeepEagle Defense Systems</title>
+    <style>
+        :root {
+            --bg-color: #020617; /* Very Dark Navy */
+            --panel-color: #0f172a; /* Slate 900 */
+            --border-color: #1e293b; /* Slate 800 */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-primary: #0ea5e9; /* Sky 500 */
+            --accent-hover: #0284c7;
+            --accent-secondary: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --gold-color: #eab308;
+            
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --header-height: 60px;
+            --footer-height: 50px;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.4) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- SVG ICONS --- */
+        .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-lg { width: 40px; height: 40px; margin-bottom: 12px; stroke-width: 1.5; color: var(--accent-primary); }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            height: var(--header-height);
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+        
+        .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+        .nav-logo-icon { color: var(--accent-primary); }
+        .nav-status { font-size: 0.75rem; color: var(--success-color); display: flex; align-items: center; gap: 6px; }
+        .nav-status::before { content: ''; width: 6px; height: 6px; background: currentColor; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+
+        /* --- HOME HUB --- */
+        #home-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding-top: var(--header-height);
+            box-sizing: border-box;
+            background: radial-gradient(circle at 50% 30%, rgba(14, 165, 233, 0.1) 0%, rgba(2, 6, 23, 0) 60%);
+            z-index: 50;
+            overflow-y: auto; 
+            display: flex; flex-direction: column; 
+            transition: opacity 0.4s ease-in-out;
+        }
+        #home-screen.hidden { opacity: 0; pointer-events: none; }
+
+        .home-content-wrapper {
+            flex: 1; /* Pushes footer down */
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%;
+        }
+
+        .hero-section { text-align: center; margin: 40px 20px 30px; max-width: 600px; }
+        .hero-title { 
+            font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #fff 30%, #94a3b8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
+
+        .modules-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px; 
+            max-width: 1000px; width: 90%; 
+            padding: 0 20px 40px 20px;
+        }
+
+        .module-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            position: relative; overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        .module-card:hover {
+            transform: translateY(-4px);
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.2);
+        }
+        
+        .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 8px; color: #fff; }
+        .card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+
+        /* FOOTER */
+        .home-footer {
+            width: 100%;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+        .footer-links { margin-top: 5px; opacity: 0.7; }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 600px) {
+            .modules-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 10px; 
+                padding: 0 10px 20px 10px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .module-card { padding: 15px 10px; min-height: 140px; }
+            .icon-lg { width: 32px; height: 32px; margin-bottom: 8px; }
+            .card-title { font-size: 0.9rem; }
+            .card-desc { font-size: 0.7rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+            .hero-title { font-size: 1.8rem; }
+            .hero-desc { font-size: 0.9rem; }
+        }
+
+        /* --- SIMULATION UI --- */
+        #sim-ui { 
+            display: flex; width: 100%; height: 100%; 
+            padding-top: var(--header-height); box-sizing: border-box;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s; 
+            position: relative; 
+        }
+        #sim-ui.active { opacity: 1; pointer-events: all; }
+
+        #sidebar-toggle {
+            position: absolute; top: calc(var(--header-height) + 15px); left: 15px; z-index: 100;
+            background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border-color);
+            color: var(--text-muted); width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; transition: all 0.2s;
+        }
+        #sidebar-toggle:hover { color: #fff; border-color: var(--accent-primary); }
+
+        #sidebar {
+            width: 320px; background-color: var(--panel-color);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+            z-index: 90; position: relative;
+            flex-shrink: 0;
+        }
+        #sidebar.collapsed { width: 0; transform: translateX(-100%); border: none; overflow: hidden; }
+
+        .sidebar-content { padding: 20px; overflow-y: auto; height: 100%; width: 320px; box-sizing: border-box; }
+        
+        .back-nav-container { padding-bottom: 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+        .btn-back {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 100%; padding: 10px 15px;
+            border-radius: 6px; cursor: pointer;
+            font-weight: 600; font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+
+        .module-header { margin-bottom: 20px; }
+        .module-badge {
+            display: inline-block; padding: 4px 8px; border-radius: 2px;
+            background: rgba(14, 165, 233, 0.15); color: var(--accent-primary);
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
+
+        .stats-panel {
+            background: rgba(2, 6, 23, 0.5); border: 1px solid var(--border-color);
+            padding: 12px; border-radius: 6px; margin-bottom: 20px;
+        }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-muted); }
+        .stat-val { font-family: 'Menlo', monospace; color: #fff; font-weight: 600; }
+        .stat-val.gold { color: var(--gold-color); }
+
+        .control-section { margin-bottom: 24px; }
+        .section-label { 
+            display: block; font-size: 0.7rem; text-transform: uppercase; 
+            letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 700; 
+        }
+
+        input[type="range"] {
+            width: 100%; background: transparent; height: 4px; border-radius: 2px; margin: 8px 0 16px 0;
+            appearance: none; background: var(--border-color); cursor: pointer; display: block;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none; width: 16px; height: 16px; background: var(--accent-primary);
+            border-radius: 50%; cursor: pointer; transition: transform 0.1s; border: 2px solid var(--bg-color);
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        .slider-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #fff; font-weight: 500; }
+
+        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
+        .btn {
+            flex: 1; padding: 10px; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-family: var(--font-family);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-primary { background: var(--accent-primary); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--accent-primary); color: #fff; }
+        .btn-special {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #3b82f6 100%);
+            color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2); width: 100%; margin-bottom: 10px;
+        }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+        .btn-demo { background: rgba(234, 179, 8, 0.1); color: var(--gold-color); border: 1px solid rgba(234, 179, 8, 0.2); width: 100%; }
+        .btn-demo:hover { background: rgba(234, 179, 8, 0.2); }
+
+        input[type="file"] { display: none; }
+        .file-label {
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.03); border: 1px dashed var(--border-color);
+            padding: 8px; border-radius: 4px; color: var(--text-muted); cursor: pointer;
+            font-size: 0.8rem; width: 100%; box-sizing: border-box; transition: all 0.2s;
+        }
+        .file-label:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        .legend { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .legend-item { display: flex; align-items: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+        .dot { width: 8px; height: 8px; border-radius: 2px; margin-right: 10px; }
+
+        #canvas-wrapper { flex-grow: 1; position: relative; background: #000; overflow: hidden; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        #overlay-msg {
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(2, 6, 23, 0.9); border: 1px solid var(--accent-primary);
+            color: var(--accent-primary); padding: 8px 24px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <svg class="icon nav-logo-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2-1-2-1-2 1 2 1zm0-3l-2 1 2 1 2-1-2-1zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            DeepEagle
+        </div>
+        <div class="nav-status">SYSTEM ACTIVE</div>
+    </nav>
+
+    <!-- HOME HUB -->
+    <div id="home-screen">
+        <div class="home-content-wrapper">
+            <div class="hero-section">
+                <h1 class="hero-title">Neural Defense Hub</h1>
+                <div class="hero-desc">Select a training module to begin autonomous drone simulation. Train, refine, and deploy neural networks.</div>
+            </div>
+
+            <div class="modules-grid">
+                <!-- GENERAL -->
+                <div class="module-card" onclick="app.loadModule('general')">
+                    <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <div class="card-title">General Training</div>
+                    <div class="card-desc">Standard balanced model. Prioritizes escort and threat neutralization.</div>
+                </div>
+
+                <!-- TRACKING -->
+                <div class="module-card" onclick="app.loadModule('tracking')">
+                    <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                    <div class="card-title">VIP Tracking</div>
+                    <div class="card-desc">Specialized escort. Stick to the VIP (Green) at all costs.</div>
+                </div>
+
+                <!-- DETECTION -->
+                <div class="module-card" onclick="app.loadModule('detection')">
+                    <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <div class="card-title">Detection</div>
+                    <div class="card-desc">Recon mode. Keep visual contact with threats without engaging.</div>
+                </div>
+
+                <!-- ATTACK -->
+                <div class="module-card" onclick="app.loadModule('attack')">
+                    <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                    <div class="card-title">Neutralization</div>
+                    <div class="card-desc">Aggressive interceptor. Physical impact on the threat.</div>
+                </div>
+
+                <!-- WEIGHTED -->
+                <div class="module-card" onclick="app.loadModule('weighted')">
+                    <svg class="icon icon-lg" style="color:var(--gold-color)" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"></path><rect x="9" y="9" width="6" height="6"></rect></svg>
+                    <div class="card-title" style="color:var(--gold-color)">Custom Lab</div>
+                    <div class="card-desc">Configure parameters for specialized behavior research.</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="home-footer">
+            <div>© 2024 DeepEagle Defense Systems. All rights reserved.</div>
+            <div class="footer-links">System Status: <span style="color:var(--success-color)">OPERATIONAL</span> | v3.2 Stable</div>
+        </footer>
+    </div>
+
+    <!-- SIMULATION INTERFACE -->
+    <div id="sim-ui">
+        <!-- Floating Toggle -->
+        <div id="sidebar-toggle" onclick="app.toggleSidebar()">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </div>
+
+        <div id="sidebar">
+            <div class="sidebar-content">
+                <!-- NEW BACK BUTTON -->
+                <div class="back-nav-container">
+                    <button class="btn-back" onclick="app.goHome()">
+                        <svg class="icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        Back to Modules
+                    </button>
+                </div>
+
+                <div class="module-header">
+                    <span id="module-badge" class="module-badge">GENERAL</span>
+                    <h2 id="module-title">Training Module</h2>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-panel">
+                    <div class="stat-row"><span>Generation</span><span id="gen-display" class="stat-val">1</span></div>
+                    <div class="stat-row"><span>Population</span><span id="pop-display" class="stat-val">50/50</span></div>
+                    <div class="stat-row"><span>Record Fitness</span><span id="best-display" class="stat-val gold">0</span></div>
+                </div>
+
+                <!-- Custom Weights -->
+                <div id="weighted-controls" class="control-section" style="display:none; border-bottom:1px solid var(--border-color); padding-bottom:15px; margin-bottom:15px;">
+                    <span class="section-label">Target Weighting (Total: 100%)</span>
+                    
+                    <div class="slider-row"><span>Tracking</span><span id="w-track-val">34%</span></div>
+                    <input type="range" id="w-track" min="0" max="100" value="34" oninput="app.balanceWeights('w-track')">
+                    
+                    <div class="slider-row"><span>Detection</span><span id="w-detect-val">33%</span></div>
+                    <input type="range" id="w-detect" min="0" max="100" value="33" oninput="app.balanceWeights('w-detect')">
+                    
+                    <div class="slider-row"><span>Intercept</span><span id="w-attack-val">33%</span></div>
+                    <input type="range" id="w-attack" min="0" max="100" value="33" oninput="app.balanceWeights('w-attack')">
+                </div>
+
+                <!-- Main Controls -->
+                <div class="control-section">
+                    <span class="section-label">Simulation Parameters</span>
+                    
+                    <div class="slider-row"><span>Sim Speed</span><span id="speed-val">1x</span></div>
+                    <input type="range" id="speed-slider" min="1" max="50" value="1" oninput="app.updateUI()">
+
+                    <div class="slider-row"><span>Threat Agility</span><span id="diff-val">Normal</span></div>
+                    <input type="range" id="diff-slider" min="1" max="15" value="5" oninput="app.updateUI()">
+
+                    <div class="slider-row"><span>Mutation Rate</span><span id="mut-val">5%</span></div>
+                    <input type="range" id="mut-slider" min="0" max="50" value="5" oninput="app.updateUI()">
+                </div>
+
+                <!-- Actions -->
+                <div class="control-section">
+                    <button class="btn btn-special" onclick="simulation.refineStrategy()">
+                        <svg class="icon" style="width:16px" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        Refine Strategy (Fine-Tune)
+                    </button>
+                    
+                    <button class="btn btn-demo" id="demo-btn" onclick="simulation.toggleDemo()">
+                        <svg class="icon" style="width:16px" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View Best Champion
+                    </button>
+
+                    <div class="btn-group">
+                        <button class="btn btn-danger" onclick="simulation.reset()">Reset</button>
+                        <button class="btn btn-outline" onclick="simulation.toggleVision()">Vision</button>
+                    </div>
+                </div>
+
+                <!-- Persistence -->
+                <div class="control-section">
+                    <span class="section-label">Model Persistence</span>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="simulation.saveBrain()">Download JSON</button>
+                        <label class="file-label">
+                            Upload JSON
+                            <input type="file" id="brain-upload" accept=".json" onchange="simulation.loadBrain(this)">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="dot" style="background:var(--success-color)"></div>VIP Target (Protect)</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--danger-color)"></div>Threat (Neutralize)</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--gold-color)"></div>Champion</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--accent-primary)"></div>Swarm Unit</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-wrapper">
+            <canvas id="sim-canvas"></canvas>
+            <div id="overlay-msg">System Initialized</div>
+        </div>
+    </div>
+
+<script>
+/**
+ * DEEPEAGLE DEFENSE SUITE - CORE ENGINE
+ * V3.2 - Weighted Balancing & Footer
+ */
+
+// --- VECTOR MATH ---
+class Vec2 {
+    constructor(x, y) { this.x = x; this.y = y; }
+    add(v) { this.x += v.x; this.y += v.y; return this; }
+    sub(v) { this.x -= v.x; this.y -= v.y; return this; }
+    mult(n) { this.x *= n; this.y *= n; return this; }
+    div(n) { this.x /= n; this.y /= n; return this; }
+    mag() { return Math.sqrt(this.x*this.x + this.y*this.y); }
+    normalize() { let m = this.mag(); if (m !== 0) this.div(m); return this; }
+    limit(max) { if (this.mag() > max) { this.normalize(); this.mult(max); } return this; }
+    static dist(v1, v2) { return Math.sqrt((v1.x-v2.x)**2 + (v1.y-v2.y)**2); }
+    copy() { return new Vec2(this.x, this.y); }
+}
+
+// --- NEURAL NETWORK ---
+class NeuralNetwork {
+    constructor(input, hidden, output) {
+        this.ic = input; this.hc = hidden; this.oc = output;
+        this.wih = new Float32Array(input * hidden);
+        this.who = new Float32Array(hidden * output);
+        this.bh = new Float32Array(hidden);
+        this.bo = new Float32Array(output);
+        this.randomize();
+    }
+    randomize() {
+        const r = () => Math.random() * 2 - 1;
+        for(let i=0; i<this.wih.length; i++) this.wih[i] = r();
+        for(let i=0; i<this.who.length; i++) this.who[i] = r();
+        for(let i=0; i<this.bh.length; i++) this.bh[i] = r();
+        for(let i=0; i<this.bo.length; i++) this.bo[i] = r();
+    }
+    mutate(rate) {
+        const m = (v) => Math.random() < rate ? v + (Math.random() * 0.5 - 0.25) : v;
+        for(let i=0; i<this.wih.length; i++) this.wih[i] = m(this.wih[i]);
+        for(let i=0; i<this.who.length; i++) this.who[i] = m(this.who[i]);
+        for(let i=0; i<this.bh.length; i++) this.bh[i] = m(this.bh[i]);
+        for(let i=0; i<this.bo.length; i++) this.bo[i] = m(this.bo[i]);
+    }
+    predict(inputs) {
+        let h = new Float32Array(this.hc);
+        for(let j=0; j<this.hc; j++) {
+            let s = 0; for(let i=0; i<this.ic; i++) s += inputs[i] * this.wih[i*this.hc + j];
+            h[j] = Math.tanh(s + this.bh[j]);
+        }
+        let o = new Float32Array(this.oc);
+        for(let k=0; k<this.oc; k++) {
+            let s = 0; for(let j=0; j<this.hc; j++) s += h[j] * this.who[j*this.oc + k];
+            o[k] = Math.tanh(s + this.bo[k]);
+        }
+        return o;
+    }
+    toJSON() { return { ic:this.ic, hc:this.hc, oc:this.oc, wih:Array.from(this.wih), who:Array.from(this.who), bh:Array.from(this.bh), bo:Array.from(this.bo) }; }
+    static fromJSON(d) {
+        let n = new NeuralNetwork(d.ic, d.hc, d.oc);
+        n.wih.set(d.wih); n.who.set(d.who); n.bh.set(d.bh); n.bo.set(d.bo);
+        return n;
+    }
+    copy() {
+        let n = new NeuralNetwork(this.ic, this.hc, this.oc);
+        n.wih.set(this.wih); n.who.set(this.who); n.bh.set(this.bh); n.bo.set(this.bo);
+        return n;
+    }
+}
+
+// --- APP CONTROLLER ---
+const app = {
+    currentMode: 'general',
+    
+    loadModule(mode) {
+        this.currentMode = mode;
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('sim-ui').classList.add('active');
+        
+        const config = {
+            'general': { title: 'General Training', badge: 'BALANCED' },
+            'tracking': { title: 'VIP Tracking', badge: 'ESCORT' },
+            'detection': { title: 'Threat Detection', badge: 'RECON' },
+            'attack': { title: 'Neutralization', badge: 'INTERCEPT' },
+            'weighted': { title: 'Custom Lab', badge: 'RESEARCH' }
+        };
+        
+        document.getElementById('module-title').innerText = config[mode].title;
+        document.getElementById('module-badge').innerText = config[mode].badge;
+        document.getElementById('weighted-controls').style.display = (mode === 'weighted') ? 'block' : 'none';
+        
+        if(window.innerWidth > 768) {
+            document.getElementById('sidebar').classList.remove('collapsed');
+        } else {
+            document.getElementById('sidebar').classList.add('collapsed');
+        }
+
+        simulation.start(mode);
+    },
+
+    goHome() {
+        document.getElementById('sim-ui').classList.remove('active');
+        document.getElementById('home-screen').classList.remove('hidden');
+        simulation.stop();
+    },
+
+    toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        setTimeout(() => simulation.resize(), 310);
+    },
+
+    updateUI() {
+        document.getElementById('speed-val').innerText = document.getElementById('speed-slider').value + 'x';
+        
+        let d = document.getElementById('diff-slider').value;
+        document.getElementById('diff-val').innerText = d<5?"Low":d<10?"High":"Extreme";
+        
+        document.getElementById('mut-val').innerText = document.getElementById('mut-slider').value + '%';
+    },
+
+    // BALANCED WEIGHTS LOGIC
+    balanceWeights(sourceId) {
+        const ids = ['w-track', 'w-detect', 'w-attack'];
+        const el = document.getElementById(sourceId);
+        let val = parseInt(el.value);
+        
+        // Clamp
+        if(val > 100) { val = 100; el.value = 100; }
+        if(val < 0) { val = 0; el.value = 0; }
+        
+        const others = ids.filter(id => id !== sourceId);
+        
+        // Calculate remaining allowance
+        const remaining = 100 - val;
+        
+        // Get current values of others to calculate ratios
+        let totalOthers = 0;
+        others.forEach(id => totalOthers += parseInt(document.getElementById(id).value));
+        
+        // Distribute remaining proportional to current values
+        let accumulated = 0;
+        others.forEach((id, index) => {
+            let newVal;
+            if(totalOthers === 0) {
+                // If they were 0, split evenly
+                newVal = Math.floor(remaining / others.length);
+            } else {
+                // Proportional scale
+                const current = parseInt(document.getElementById(id).value);
+                const ratio = current / totalOthers;
+                newVal = Math.floor(remaining * ratio);
+            }
+            
+            // Adjust last one to ensure exact sum of 100 due to rounding
+            if(index === others.length - 1) {
+                newVal = remaining - accumulated;
+            }
+            
+            document.getElementById(id).value = newVal;
+            accumulated += newVal;
+        });
+
+        // Update text
+        this.updateWeightsUI();
+    },
+
+    updateWeightsUI() {
+        document.getElementById('w-track-val').innerText = document.getElementById('w-track').value + '%';
+        document.getElementById('w-detect-val').innerText = document.getElementById('w-detect').value + '%';
+        document.getElementById('w-attack-val').innerText = document.getElementById('w-attack').value + '%';
+    }
+};
+
+// --- SIMULATION ENTITIES ---
+const canvas = document.getElementById('sim-canvas');
+const ctx = canvas.getContext('2d');
+
+class Drone {
+    constructor(brain) {
+        this.pos = new Vec2(canvas.width/2, canvas.height/2);
+        this.vel = new Vec2(0,0);
+        this.acc = new Vec2(0,0);
+        this.brain = brain ? brain.copy() : new NeuralNetwork(6, 8, 2);
+        this.r = 6;
+        this.color = 'rgba(14, 165, 233, 0.5)';
+        this.maxSpeed = 5;
+        this.fitness = 0;
+        this.dead = false;
+        this.isBest = false;
+    }
+    
+    update() {
+        this.vel.add(this.acc);
+        this.vel.limit(this.maxSpeed);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+        
+        if(this.pos.x < 0 || this.pos.x > canvas.width) this.vel.x *= -1;
+        if(this.pos.y < 0 || this.pos.y > canvas.height) this.vel.y *= -1;
+        this.pos.x = Math.max(0, Math.min(canvas.width, this.pos.x));
+        this.pos.y = Math.max(0, Math.min(canvas.height, this.pos.y));
+    }
+    
+    think(t, a) {
+        let inputs = [
+            (t.pos.x - this.pos.x)/canvas.width,
+            (t.pos.y - this.pos.y)/canvas.height,
+            (a.pos.x - this.pos.x)/canvas.width,
+            (a.pos.y - this.pos.y)/canvas.height,
+            this.vel.x/this.maxSpeed,
+            this.vel.y/this.maxSpeed
+        ];
+        let out = this.brain.predict(inputs);
+        this.acc.add(new Vec2(out[0], out[1]).mult(0.5));
+    }
+
+    draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI*2); ctx.fill();
+        if(this.isBest) {
+            ctx.strokeStyle = this.color; ctx.lineWidth = 2; ctx.stroke();
+            ctx.shadowBlur = 10; ctx.shadowColor = this.color;
+            ctx.stroke(); ctx.shadowBlur = 0;
+        }
+    }
+}
+
+class Target {
+    constructor() {
+        this.pos = new Vec2(canvas.width/2, canvas.height/2);
+        this.vel = new Vec2(0,0);
+        this.acc = new Vec2(0,0);
+        this.r = 8;
+        this.noise = Math.random()*1000;
+    }
+    move(diff) {
+        this.noise += 0.02;
+        let angle = Math.sin(this.noise) * Math.PI * 2;
+        let f = new Vec2(Math.cos(angle), Math.sin(angle)).mult(0.3);
+        
+        let c = new Vec2(canvas.width/2, canvas.height/2);
+        if(Vec2.dist(this.pos, c) > canvas.width/2.5) {
+            f.add(c.sub(this.pos).normalize().mult(0.5));
+        }
+        
+        this.acc.add(f);
+        this.vel.add(this.acc);
+        this.vel.limit(2 + diff*0.1);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+        
+        this.pos.x = Math.max(10, Math.min(canvas.width-10, this.pos.x));
+        this.pos.y = Math.max(10, Math.min(canvas.height-10, this.pos.y));
+    }
+    draw(ctx) {
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.r+4, 0, Math.PI*2); ctx.stroke();
+    }
+}
+
+class Attacker {
+    constructor() {
+        this.pos = new Vec2(10, 10);
+        this.vel = new Vec2(0,0);
+        this.acc = new Vec2(0,0);
+        this.r = 7;
+        this.respawn();
+    }
+    respawn() {
+        this.pos.x = Math.random()<0.5 ? 0 : canvas.width;
+        this.pos.y = Math.random()*canvas.height;
+    }
+    chase(t, diff) {
+        let maxS = 3 + diff * 0.4;
+        let dir = new Vec2(t.pos.x - this.pos.x, t.pos.y - this.pos.y).normalize().mult(maxS);
+        let steer = dir.sub(this.vel).limit(0.25);
+        this.acc.add(steer);
+        this.vel.add(this.acc);
+        this.vel.limit(maxS);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+    }
+    draw(ctx) {
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI*2); ctx.fill();
+    }
+}
+
+// --- SIMULATION MANAGER ---
+class Simulation {
+    constructor() {
+        this.active = false;
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        this.mode = 'general';
+        this.drones = [];
+        this.target = null;
+        this.attacker = null;
+        this.gen = 1;
+        this.bestAllTime = null;
+        this.bestFit = 0;
+        this.demo = false;
+        this.vision = false;
+        this.loopId = null;
+    }
+    
+    resize() {
+        if(canvas.parentElement) {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+    }
+
+    start(mode) {
+        this.mode = mode;
+        this.active = true;
+        this.gen = 1;
+        this.bestFit = 0;
+        this.bestAllTime = null;
+        this.demo = false;
+        this.loadLocal();
+        this.target = new Target();
+        this.attacker = new Attacker();
+        this.initPop();
+        this.flash("SYSTEM ONLINE: " + mode.toUpperCase());
+        this.loop();
+    }
+    
+    stop() {
+        this.active = false;
+        cancelAnimationFrame(this.loopId);
+    }
+
+    initPop(brain) {
+        this.drones = [];
+        let size = this.demo ? 1 : 50;
+        if (this.demo && this.bestAllTime) brain = NeuralNetwork.fromJSON(this.bestAllTime);
+
+        for(let i=0; i<size; i++) {
+            let d = new Drone(brain);
+            if(this.demo) {
+                d.isBest = true; d.color = '#eab308'; d.r = 10;
+            }
+            this.drones.push(d);
+        }
+        
+        if(brain && !this.demo) {
+            let mr = document.getElementById('mut-slider').value / 100;
+            for(let i=1; i<this.drones.length; i++) this.drones[i].brain.mutate(mr);
+        }
+    }
+
+    reset() {
+        this.gen = 1;
+        this.bestFit = 0;
+        this.demo = false;
+        document.getElementById('demo-btn').innerHTML = `<svg class="icon" style="width:16px" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View Best Champion`;
+        this.target = new Target();
+        this.attacker = new Attacker();
+        this.initPop();
+        this.flash("RESET COMPLETE");
+    }
+
+    refineStrategy() {
+        if(!this.bestAllTime) {
+            this.flash("NO DATA: COMPLETE 1 GEN");
+            return;
+        }
+        document.getElementById('mut-slider').value = 1;
+        app.updateUI();
+        this.gen++;
+        this.initPop(NeuralNetwork.fromJSON(this.bestAllTime));
+        this.flash("FINE-TUNING MODE (1% MUT)");
+    }
+
+    toggleDemo() {
+        if(!this.bestAllTime) { this.flash("NO CHAMPION DATA"); return; }
+        this.demo = !this.demo;
+        let btn = document.getElementById('demo-btn');
+        if(this.demo) {
+            btn.innerHTML = `STOP DEMO`;
+            btn.style.background = "rgba(234, 179, 8, 0.3)";
+            this.flash("DEMO MODE: CHAMPION");
+        } else {
+            btn.innerHTML = `<svg class="icon" style="width:16px" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View Best Champion`;
+            btn.style.background = "";
+            this.flash("RESUMING TRAINING");
+        }
+        this.target = new Target();
+        this.attacker.respawn();
+        this.initPop(NeuralNetwork.fromJSON(this.bestAllTime));
+    }
+
+    evolve() {
+        if(this.demo) {
+            this.drones[0].pos = new Vec2(canvas.width/2, canvas.height/2);
+            this.drones[0].vel.mult(0);
+            this.drones[0].fitness = 0;
+            this.drones[0].dead = false;
+            this.target = new Target();
+            this.attacker.respawn();
+            return;
+        }
+
+        this.drones.sort((a,b) => b.fitness - a.fitness);
+        let best = this.drones[0];
+        
+        if(best.fitness > this.bestFit) {
+            this.bestFit = Math.floor(best.fitness);
+            this.bestAllTime = best.brain.toJSON();
+            this.saveLocal();
+        }
+        
+        let newPop = [];
+        let champ = new Drone(best.brain); champ.isBest = true; champ.color = '#eab308';
+        newPop.push(champ);
+        
+        let mr = document.getElementById('mut-slider').value / 100;
+        let pool = this.drones.slice(0, 25); 
+        
+        while(newPop.length < 50) {
+            let p = pool[Math.floor(Math.random()*pool.length)];
+            let c = new Drone(p.brain);
+            c.brain.mutate(mr);
+            newPop.push(c);
+        }
+        
+        this.drones = newPop;
+        this.gen++;
+        this.target = new Target();
+        this.attacker.respawn();
+        this.drones.forEach(d => {
+            if(!d.isBest) d.pos = new Vec2(canvas.width/2, canvas.height/2);
+            d.vel.mult(0); d.fitness = 0; d.dead = false;
+        });
+    }
+
+    update() {
+        let loops = parseInt(document.getElementById('speed-slider').value);
+        let diff = parseInt(document.getElementById('diff-slider').value) - 5 + Math.min(10, this.gen/5);
+        
+        let wt = parseInt(document.getElementById('w-track').value) / 100;
+        let wd = parseInt(document.getElementById('w-detect').value) / 100;
+        let wa = parseInt(document.getElementById('w-attack').value) / 100;
+
+        for(let k=0; k<loops; k++) {
+            this.target.move(diff);
+            this.attacker.chase(this.target, diff);
+
+            if(Vec2.dist(this.attacker.pos, this.target.pos) < this.attacker.r + this.target.r) {
+                this.drones.forEach(d => { if(!d.dead) { d.fitness -= 50; d.dead = true; }});
+                this.evolve(); return;
+            }
+
+            let intercept = false;
+            for(let d of this.drones) {
+                if(d.dead) continue;
+                d.think(this.target, this.attacker);
+                d.update();
+
+                let dTarget = Vec2.dist(d.pos, this.target.pos);
+                let dAttacker = Vec2.dist(d.pos, this.attacker.pos);
+                let hit = dAttacker < (d.r + this.attacker.r);
+
+                if(this.mode === 'general') {
+                    if(dTarget < 150) d.fitness += 1;
+                    if(dTarget > 500) d.fitness -= 2;
+                    if(hit) { d.fitness += 300; intercept = true; }
+                }
+                else if(this.mode === 'tracking') {
+                    if(dTarget < 100) d.fitness += 2;
+                    if(dTarget < 200) d.fitness += 1;
+                    if(dTarget > 400) d.fitness -= 2;
+                }
+                else if(this.mode === 'detection') {
+                    if(dAttacker < 250) d.fitness += 1; 
+                    if(dAttacker < 60) d.fitness -= 5; 
+                }
+                else if(this.mode === 'attack') {
+                    if(hit) { d.fitness += 500; intercept = true; }
+                }
+                else if(this.mode === 'weighted') {
+                    if(dTarget < 150) d.fitness += (1 * wt);
+                    if(dAttacker < 250) d.fitness += (1 * wd);
+                    if(hit) { d.fitness += (300 * wa); intercept = true; }
+                }
+            }
+
+            if(intercept) {
+                this.attacker.respawn();
+                if(this.mode !== 'tracking' && this.mode !== 'detection') {
+                    this.drones.forEach(d => { if(!d.dead && Vec2.dist(d.pos, this.attacker.pos)<200) d.fitness += 50; });
+                }
+            }
+
+            this.frames = (this.frames || 0) + 1;
+            if(this.frames > 1500) { this.frames = 0; this.evolve(); return; }
+        }
+    }
+
+    draw() {
+        ctx.fillStyle = '#020617'; ctx.fillRect(0,0,canvas.width, canvas.height);
+        
+        if(this.gen % 2 === 0) {
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x=0; x<canvas.width; x+=50) { ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); }
+            for(let y=0; y<canvas.height; y+=50) { ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
+            ctx.stroke();
+        }
+
+        this.target.draw(ctx);
+        this.attacker.draw(ctx);
+        
+        let alive = 0;
+        this.drones.forEach(d => {
+            if(!d.dead) {
+                alive++;
+                if(d.isBest) d.draw(ctx);
+                else {
+                    ctx.globalAlpha = 0.4;
+                    d.draw(ctx);
+                    ctx.globalAlpha = 1;
+                }
+            }
+        });
+
+        if(this.vision && this.drones.length > 0 && !this.drones[0].dead) {
+             let b = this.drones[0];
+             ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)'; ctx.beginPath(); ctx.moveTo(b.pos.x, b.pos.y); ctx.lineTo(this.target.pos.x, this.target.pos.y); ctx.stroke();
+             ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)'; ctx.beginPath(); ctx.moveTo(b.pos.x, b.pos.y); ctx.lineTo(this.attacker.pos.x, this.attacker.pos.y); ctx.stroke();
+        }
+
+        if(this.frames % 10 === 0) {
+            document.getElementById('gen-display').innerText = this.gen;
+            document.getElementById('pop-display').innerText = `${alive}/50`;
+            document.getElementById('best-display').innerText = this.bestFit;
+        }
+    }
+
+    loop() {
+        if(!this.active) return;
+        this.update(); this.draw();
+        this.loopId = requestAnimationFrame(() => this.loop());
+    }
+
+    flash(msg) {
+        const el = document.getElementById('overlay-msg');
+        el.innerText = msg; el.style.opacity = 1;
+        setTimeout(() => el.style.opacity = 0, 2000);
+    }
+    
+    toggleVision() { this.vision = !this.vision; }
+
+    saveBrain() {
+        if(!this.bestAllTime) return;
+        let blob = new Blob([JSON.stringify(this.bestAllTime)], {type: 'application/json'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url; a.download = `deepeagle_${this.mode}_gen${this.gen}.json`;
+        a.click();
+    }
+    loadBrain(input) {
+        let f = input.files[0]; if(!f) return;
+        let r = new FileReader();
+        r.onload = (e) => {
+            this.bestAllTime = JSON.parse(e.target.result);
+            this.flash("NEURAL DATA LOADED");
+            this.toggleDemo();
+        };
+        r.readAsText(f);
+        input.value = '';
+    }
+    saveLocal() { localStorage.setItem(`deepeagle_v3_${this.mode}`, JSON.stringify(this.bestAllTime)); }
+    loadLocal() {
+        let d = localStorage.getItem(`deepeagle_v3_${this.mode}`);
+        if(d) this.bestAllTime = JSON.parse(d);
+    }
+}
+
+const simulation = new Simulation();
+app.updateUI();
+
+</script>
+</body>
+</html>
+OK
